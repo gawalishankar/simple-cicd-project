@@ -4,7 +4,7 @@ metadata:
   name: simple-ingress
 spec:
   rules:
-  - host: localhost
+  - host: simple-app.local
     http:
       paths:
       - path: /

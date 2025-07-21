@@ -23,13 +23,14 @@ jobs:
         docker build -t shiv201/backend:latest -f Dockerfile-backend .
         docker push shiv201/backend:latest
 
-    - name: Set up Kubeconfig
+    - name: Set up KUBECONFIG
       run: |
-        mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
-      env:
-        KUBECONFIG: $HOME/.kube/config
+       echo "${{ secrets.KUBECONFIG }}" | base64 --decode > kubeconfig.yaml
+       export KUBECONFIG=$PWD/kubeconfig.yaml
+       kubectl get nodes  # just to verify it's working
 
-    - name: Deploy to Kubernetes
+    - name: Apply Kubernetes Manifests
       run: |
-        kubectl apply -f k8s/
+       export KUBECONFIG=$PWD/kubeconfig.yaml
+       kubectl apply -f k8s/
+

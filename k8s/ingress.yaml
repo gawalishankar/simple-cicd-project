@@ -8,7 +8,6 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: yourdomain.com # or remove host to make it public on IP
     http:
       paths:
       - path: /

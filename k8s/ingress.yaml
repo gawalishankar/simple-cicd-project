@@ -2,9 +2,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: simple-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  ingressClassName: nginx
   rules:
-  - host: simple-app.local
+  - host: yourdomain.com # or remove host to make it public on IP
     http:
       paths:
       - path: /

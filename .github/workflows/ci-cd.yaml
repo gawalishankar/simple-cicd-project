@@ -1,16 +1,32 @@
-name: CI/CD Pipeline
+name: CI/CD to EKS
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --name ${{ secrets.CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
 
     - name: Build and Push Frontend
       run: |
@@ -23,14 +39,6 @@ jobs:
         docker build -t shiv201/backend:latest -f Dockerfile-backend .
         docker push shiv201/backend:latest
 
-    - name: Set up KUBECONFIG
+    - name: Deploy to EKS
       run: |
-       echo "${{ secrets.KUBECONFIG }}" | base64 --decode > kubeconfig.yaml
-       export KUBECONFIG=$PWD/kubeconfig.yaml
-       kubectl get nodes  # just to verify it's working
-
-    - name: Apply Kubernetes Manifests
-      run: |
-       export KUBECONFIG=$PWD/kubeconfig.yaml
-       kubectl apply -f k8s/
-
+        kubectl apply -f k8s/
